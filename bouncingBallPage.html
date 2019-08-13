@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <!-- 
+	Ana Carolina de Souza Mendes
+        CSI 242 - Client-side Scripting
+        Bouncing Ball with Paddle - Assignment 3
+    -->
+    <style>
+        #mycanvas {
+            border: 2px solid black;
+            /*background-color: lightgray;*/
+        }
+
+        button {
+            margin-bottom: 10px;
+        }
+
+        div {
+            float: left;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h3>Bouncing Ball with Paddle</h3>
+
+    <div>
+        <!--set width and height inline is better than in CSS because it looks weird the other way-->
+        <canvas id="mycanvas" width="400" height="500"></canvas>
+    </div>
+    <div>
+        <button id="btnStart">Start</button><br />
+        <button id="btnClearTimer">Stop</button>
+    </div>
+
+    <script>
+        var canvas = document.getElementById("mycanvas");
+        //get the canvas graphics object or context
+        var ctx = canvas.getContext("2d");
+        //-----------------------FUNCTION CONSTRUCTOR------------------
+        //define a function constructor to create ball objects
+        function Ball(x, y, r, dx, dy) {            
+            this.x = x;
+            this.y = y;
+            this.r = r;
+            this.dx = dx; //change if x direction
+            this.dy = dy; //change if y direction
+
+            this.update = function () {
+                this.x += this.dx; //update the value of x
+                this.y += this.dy; //update the value of y
+            }
+        }
+
+        //define a function contructor to create the paddle
+        function Paddle(x, y, w, h, dx, dy) {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            this.h = h;
+            this.dx = dx; //change if x direction
+            this.dy = dy; //change if y direction
+
+            this.update = function () {
+                this.x += this.dx; //update the value of x with keyDown
+            }
+        }
+        //-----------------------------------------------------------------
+        //create a Ball Object
+        var ball = new Ball(canvas.width / 2, canvas.height - (15 + 25), 25, 2, 2);
+        //create Paddle
+        var paddle = new Paddle(canvas.width / 2 - 150 / 2, canvas.height - 15, 150, 15, 2, 2);
+
+        //draw ball
+        ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI);
+        ctx.fillStyle = "#00868B"
+        ctx.fill();
+        //draw paddle
+        ctx.fillStyle = "#000000"
+        ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+        //-------------------------MOVE FUNCTIONS------------------
+        function moveBall() {
+            //clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            //update the x and y coordinate of ball
+            if (paddle.x <= ball.x && ball.x <= (paddle.x + paddle.w + ball.r)) {
+                if ((ball.x + ball.r) > canvas.width) {
+                    ball.dx = -(getRandom(5) + 3);
+                }
+                else if (ball.x - ball.r < 0) {
+                    ball.dx = getRandom(5) + 3;
+                }
+                else if ((ball.y + ball.r + paddle.h) > canvas.height) {
+                    ball.dy = -(getRandom(5) + 3);
+                }
+                else if (ball.y - ball.r < 0) {
+                    ball.dy = getRandom(5) + 3;
+                }
+            }
+            else {                
+                if ((ball.x + ball.r) > canvas.width) {
+                    ball.dx = -(getRandom(5) + 3);
+                }
+                else if (ball.x - ball.r < 0) {
+                    ball.dx = getRandom(5) + 3;
+                }
+                else if ((ball.y + ball.r) > canvas.height) {
+                    ball.dy = -(getRandom(5) + 3);
+                }
+                else if (ball.y - ball.r < 0) {
+                    ball.dy = getRandom(5) + 3;                    
+                }
+            }
+
+            ball.update();
+            //draw ball
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI);
+            ctx.fillStyle = "#00868B"
+            ctx.fill();
+            //draw paddle
+            ctx.fillStyle = "#000000"
+            ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+        }
+
+        function movePaddle(newDx) {
+            //clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if ((paddle.x + paddle.w) > canvas.width) {
+                //stop moving if reaches the wall
+                paddle.dx = -1;
+            }
+            else if (paddle.x < 0) {
+                //stop moving if reaches the wall
+                paddle.dx = 1;
+            }
+            else {
+                paddle.dx = newDx;
+            }
+
+            paddle.update();
+            //draw paddle
+            ctx.fillStyle = "#000000"
+            ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+            //draw ball
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI);
+            ctx.fillStyle = "#00868B"
+            ctx.fill();            
+        }
+        //-------------------------BUTTONS--------------------------
+        var timerID;
+        //set up button to start timer
+        document.getElementById("btnStart").onclick = function () {
+            timerID = window.setInterval(moveBall, 20);
+        }
+        //set up button to stop timer
+        document.getElementById("btnClearTimer").onclick = function () {
+            window.clearInterval(timerID);
+        }
+        //---------------------MOVE PADDLE--------------------------
+        window.addEventListener("keydown", function (event) {
+            switch (event.keyCode) {
+                case 37: //ArrowLeft
+                    movePaddle(-6);
+                    break;
+                case 39: //ArrowRight
+                    movePaddle(6);
+                    break;
+            }
+        });
+        //-------------------HELPER METHOD--------------------------
+        function getRandom(max) {
+            var r = Math.floor(Math.random() * max);
+            return r;
+        }
+    </script>
+</body>
+</html>
